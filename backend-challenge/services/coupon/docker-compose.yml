@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: coupon-postgres
+    environment:
+      POSTGRES_DB: coupon_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d coupon_service"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - coupon-network
+    restart: unless-stopped
+
+  # Migration service (runs once to apply migrations)
+  migrate:
+    image: migrate/migrate:v4.16.2
+    container_name: coupon-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./db/migrations:/migrations
+    command: [
+      "-path", "/migrations",
+      "-database", "postgres://postgres:postgres@postgres:5432/coupon_service?sslmode=disable",
+      "up"
+    ]
+    networks:
+      - coupon-network
+    restart: "no"
+
+  # Coupon Service Application
+  coupon-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coupon-service
+    ports:
+      - "8080:8080"
+      - "9091:9091"  # Metrics port
+    environment:
+      # Database configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: coupon_service
+      DB_SSLMODE: disable
+      
+      # Server configuration
+      SERVER_PORT: 8080
+      SERVER_HOST: 0.0.0.0
+      
+      # Logging
+      LOG_LEVEL: info
+      LOG_FORMAT: json
+      
+      # Metrics
+      METRICS_ENABLED: true
+      METRICS_PORT: 9091
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - coupon-network
+    restart: unless-stopped
+
+  # pgAdmin for database management (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: coupon-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - coupon-network
+    restart: unless-stopped
+    profiles:
+      - admin
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  coupon-network:
+    driver: bridge
