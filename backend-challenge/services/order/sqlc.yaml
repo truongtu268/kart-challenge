@@ -1,0 +1,41 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "db/queries"
+    schema: "db/migrations"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/repository/postgres/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_prepared_queries: false
+        emit_interface: false
+        emit_exact_table_names: false
+        emit_empty_slices: true
+        emit_exported_queries: false
+        emit_result_struct_pointers: false
+        emit_params_struct_pointers: false
+        emit_methods_with_db_argument: false
+        emit_pointers_for_null_types: false
+        emit_enum_valid_method: false
+        emit_all_enum_values: false
+        json_tags_case_style: "snake"
+        overrides:
+          - column: "orders.id"
+            go_type: "github.com/google/uuid.UUID"
+          - column: "order_items.id"
+            go_type: "github.com/google/uuid.UUID"
+          - column: "order_items.order_id"
+            go_type: "github.com/google/uuid.UUID"
+          - column: "orders.total_amount"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "orders.discount_amount"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "orders.final_amount"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "order_items.unit_price"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "order_items.total_price"
+            go_type: "github.com/shopspring/decimal.Decimal"

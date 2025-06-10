@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coupon-service-config
+  namespace: kart-challenge
+data:
+  DATABASE_URL: "postgres://couponuser:couponpass@postgres:5432/coupon_db?sslmode=disable"
+  SERVER_HOST: "0.0.0.0"
+  SERVER_PORT: "8082"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coupon-service
+  namespace: kart-challenge
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: coupon-service
+  template:
+    metadata:
+      labels:
+        app: coupon-service
+    spec:
+      containers:
+      - name: coupon-service
+        image: coupon-service:latest
+        imagePullPolicy: Never  # For Kind local images
+        ports:
+        - containerPort: 8082
+        envFrom:
+        - configMapRef:
+            name: coupon-service-config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres -p 5432 -U couponuser; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coupon-service
+  namespace: kart-challenge
+spec:
+  selector:
+    app: coupon-service
+  ports:
+  - port: 8082
+    targetPort: 8082
+  type: ClusterIP

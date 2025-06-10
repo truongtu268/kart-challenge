@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: kart-challenge
+data:
+  POSTGRES_DB: kart_db
+  POSTGRES_USER: kartuser
+  POSTGRES_PASSWORD: kartpass
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: kart-challenge
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: kart-challenge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: postgres-config
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - kartuser
+            - -d
+            - kart_db
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - kartuser
+            - -d
+            - kart_db
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: init-scripts
+        configMap:
+          name: postgres-init-scripts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: kart-challenge
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: kart-challenge
+data:
+  01-create-databases.sql: |
+    -- Create databases for each service
+    CREATE DATABASE product_db;
+    CREATE DATABASE coupon_db;
+    CREATE DATABASE order_db;
+    
+    -- Create users for each service
+    CREATE USER productuser WITH PASSWORD 'productpass';
+    CREATE USER couponuser WITH PASSWORD 'couponpass';
+    CREATE USER orderuser WITH PASSWORD 'orderpass';
+    
+    -- Grant privileges
+    GRANT ALL PRIVILEGES ON DATABASE product_db TO productuser;
+    GRANT ALL PRIVILEGES ON DATABASE coupon_db TO couponuser;
+    GRANT ALL PRIVILEGES ON DATABASE order_db TO orderuser;
