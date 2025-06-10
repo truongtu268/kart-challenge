@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,14 +11,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/exaring/otelpgx"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
-	"coupon-service/internal/handler/http"
+	api "coupon-service/internal/handler/http"
 	"coupon-service/internal/repository"
 	"coupon-service/internal/service"
 )
@@ -44,31 +44,20 @@ type Config struct {
 
 func main() {
 	// Load configuration
-	config, err := loadConfig()
-	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
-	}
+	config := loadConfig()
 
 	// Initialize logger
-	logger, err := initLogger(config.LogLevel)
-	if err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
-	}
+	logger := initLogger(config.Log.Level, config.Log.Format)
 	defer logger.Sync()
 
 	logger.Info("Starting coupon service", zap.String("version", "1.0.0"))
 
 	// Connect to database
-	db, err := connectDB(config.DatabaseURL)
+	db, err := connectDB(config)
 	if err != nil {
 		logger.Fatal("Failed to connect to database", zap.Error(err))
 	}
 	defer db.Close()
-
-	// Run database migrations
-	if err := runMigrations(config.DatabaseURL); err != nil {
-		logger.Fatal("Failed to run migrations", zap.Error(err))
-	}
 
 	// Initialize repositories
 	couponRepo := repository.NewCouponRepository(db)
@@ -78,18 +67,18 @@ func main() {
 	couponService := service.NewCouponService(couponRepo, couponOrderRepo)
 
 	// Initialize HTTP router
-	router := http.NewRouter(couponService)
+	router := api.NewRouter(couponService)
 
 	// Create HTTP server
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:    fmt.Sprintf(":%d", config.Server.Port),
 		Handler: router.GetEngine(),
 	}
 
 	// Start server in a goroutine
 	go func() {
-		logger.Info("Starting HTTP server", zap.Int("port", config.Port))
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Info("Starting HTTP server", zap.Int("port", config.Server.Port))
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Fatal("Failed to start server", zap.Error(err))
 		}
 	}()
@@ -174,7 +163,7 @@ func initLogger(level, format string) *zap.Logger {
 	return logger
 }
 
-func connectDB(config *Config) (*sql.DB, error) {
+func connectDB(config *Config) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		config.Database.Host,
 		config.Database.Port,
@@ -184,44 +173,16 @@ func connectDB(config *Config) (*sql.DB, error) {
 		config.Database.SSLMode,
 	)
 
-	db, err := sql.Open("postgres", dsn)
+	connPool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %w", err)
+		log.Fatal("Error while creating connection to the database!!")
 	}
 
-	// Test connection
-	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+	if err := otelpgx.RecordStats(connPool); err != nil {
+		return nil, fmt.Errorf("unable to record database stats: %w", err)
 	}
 
-	// Set connection pool settings
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(5)
-	db.SetConnMaxLifetime(5 * time.Minute)
-
-	return db, nil
-}
-
-func runMigrations(db *sql.DB, config *Config) error {
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		return fmt.Errorf("failed to create migration driver: %w", err)
-	}
-
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://db/migrations",
-		"postgres",
-		driver,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create migration instance: %w", err)
-	}
-
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("failed to run migrations: %w", err)
-	}
-
-	return nil
+	return connPool, nil
 }
 
 // setupRouter function is no longer needed as we use the http package router

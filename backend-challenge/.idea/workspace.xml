@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0476b0c2-4ac0-4f47-8758-66f3a5daf291" name="Changes" comment="" />
+    <list default="true" id="0476b0c2-4ac0-4f47-8758-66f3a5daf291" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/coupon/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/services/coupon/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/coupon/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/services/coupon/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/coupon/cmd/server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/services/coupon/cmd/server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/coupon/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/services/coupon/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/coupon/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/services/coupon/go.sum" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,7 +33,12 @@
   "keyToString": {
     "Go Build.go build food-ordering-api.executor": "Run",
     "Go Test.TestListProducts in food-ordering-api.executor": "Debug",
+    "Makefile Target.db-down.executor": "Run",
     "Makefile Target.generate.executor": "Run",
+    "Makefile Target.import-couponbase1.executor": "Run",
+    "Makefile Target.import-coupons.executor": "Run",
+    "Makefile Target.init-coupons.executor": "Run",
+    "Makefile Target.setup.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
@@ -38,47 +50,60 @@
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/services/coupon/cmd/init/data" />
+      <recent name="$PROJECT_DIR$/services/coupon/cmd/init" />
       <recent name="$PROJECT_DIR$/services/coupon/internal/repository/postgres" />
       <recent name="$PROJECT_DIR$/services/coupon/db" />
       <recent name="$PROJECT_DIR$/cmd/migrate" />
     </key>
   </component>
-  <component name="RunManager" selected="Makefile Target.generate">
-    <configuration name="go build food-ordering-api" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
-      <module name="backend-challenge" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="food-ordering-api" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/main.go" />
+  <component name="RunManager" selected="Makefile Target.setup">
+    <configuration name="db-down" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/services/coupon/Makefile" target="db-down" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
       <method v="2" />
     </configuration>
-    <configuration name="TestListProducts in food-ordering-api" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="backend-challenge" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="food-ordering-api" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTestListProducts\E$" />
+    <configuration name="import-couponbase1" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/services/coupon/Makefile" target="import-couponbase1" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
       <method v="2" />
     </configuration>
-    <configuration name="generate" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
-      <makefile filename="$PROJECT_DIR$/services/coupon/Makefile" target="generate" workingDirectory="" arguments="">
+    <configuration name="import-coupons" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/services/coupon/Makefile" target="import-coupons" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="init-coupons" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/services/coupon/Makefile" target="init-coupons" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="setup" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/services/coupon/Makefile" target="setup" workingDirectory="" arguments="">
         <envs />
       </makefile>
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Makefile Target.generate" />
-        <item itemvalue="Go Build.go build food-ordering-api" />
-        <item itemvalue="Go Test.TestListProducts in food-ordering-api" />
+        <item itemvalue="Makefile Target.setup" />
+        <item itemvalue="Makefile Target.db-down" />
+        <item itemvalue="Makefile Target.import-coupons" />
+        <item itemvalue="Makefile Target.import-couponbase1" />
+        <item itemvalue="Makefile Target.init-coupons" />
       </list>
     </recent_temporary>
   </component>
@@ -96,5 +121,16 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/services/coupon/cmd/init/main.go</url>
+          <line>47</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

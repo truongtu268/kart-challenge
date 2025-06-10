@@ -1,5 +1,72 @@
 # Coupon Service
 
+A microservice for managing coupons and promo codes in the food ordering system.
+
+## Quick Start
+
+### Prerequisites
+
+- Go 1.23+
+- Docker and Docker Compose
+- PostgreSQL (via Docker)
+
+### Setup
+
+1. **Easy setup with script (recommended):**
+   ```bash
+   make setup-script
+   ```
+   This will:
+   - Start PostgreSQL database
+   - Run database migrations
+   - Read and process coupon files from local data directory
+   - Initialize valid promo codes in the database
+
+2. **Manual setup:**
+   ```bash
+   # Start database
+   make db-up
+   
+   # Run migrations
+   make migrate-up
+   
+   # Initialize coupon data
+   make init-coupons
+   ```
+
+3. **Start the service:**
+   ```bash
+   make run
+   ```
+
+### Coupon Data Initialization
+
+The service includes a command to initialize coupon data based on the project requirements:
+
+- Reads three coupon files from local data directory
+- Validates promo codes (8-10 characters, must appear in at least 2 files)
+- Stores valid codes in the database
+
+See [`cmd/init/README.md`](cmd/init/README.md) for detailed documentation.
+
+### Available Commands
+
+```bash
+make build          # Build the server
+make build-init     # Build the init command
+make run            # Run the server
+make init-coupons   # Initialize coupon data
+make test           # Run tests
+make clean          # Clean build artifacts
+make deps           # Install dependencies
+make migrate-up     # Run database migrations
+make migrate-down   # Rollback migrations
+make db-up          # Start database
+make db-down        # Stop database
+make setup          # Full setup (db + migrations + init)
+make setup-script   # Easy setup using script
+```
+
 A comprehensive coupon management service built with Go, PostgreSQL, and SQLC for type-safe database operations.
 
 ## Features
