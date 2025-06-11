@@ -49,6 +49,23 @@ The service includes a command to initialize coupon data based on the project re
 
 See [`cmd/init/README.md`](cmd/init/README.md) for detailed documentation.
 
+### Required Data Files
+
+Before running the initialization, you need to download the required coupon data files and place them in the `cmd/init/data/` directory:
+
+**Download Links:**
+- [couponbase1_unique](https://drive.google.com/file/d/1QjwEJribi6b9T0tzqTstuMvPu4o7ZGTx/view?usp=sharing)
+- [couponbase2_unique](https://drive.google.com/file/d/1rSKoSwksdV9lCY7IovBbNK6yGc_ThFOx/view?usp=drive_link)
+- [couponbase3_unique](https://drive.google.com/file/d/1b-ErGJWv2HJqPdAfwWJ-hzjFXj6yM3F7/view?usp=sharing)
+
+**Setup Instructions:**
+1. Download all three files from the Google Drive links above
+2. Place them in the `cmd/init/data/` directory
+3. Ensure the files are named exactly as shown (without any extensions)
+4. Run the initialization command: `make init-coupons`
+
+**Note:** These files are large (approximately 1GB each) and are stored externally to keep the repository size manageable.
+
 ### Available Commands
 
 ```bash
